@@ -18,8 +18,8 @@ const NewsletterSignup: React.FC<{ className?: string }> = ({ className }) => {
     setTimeout(() => {
       setLoading(false);
       toast({
-        title: "Success!",
-        description: "Thank you for subscribing to WealthSuperNova!",
+        title: "Request Received",
+        description: "Thank you for your interest in WealthSuperNova. We'll be in touch soon about early access.",
         duration: 5000,
       });
       setEmail("");
@@ -51,11 +51,11 @@ const NewsletterSignup: React.FC<{ className?: string }> = ({ className }) => {
           className="h-12 bg-supernova-gold hover:bg-supernova-gold/90 text-black font-bold transition-all"
           disabled={loading}
         >
-          {loading ? "Subscribing..." : "Get Free Financial Insights"}
+          {loading ? "Submitting..." : "Request Early Access"}
         </Button>
       </div>
       <p className="text-xs text-white/60 mt-3 text-center">
-        By subscribing, you agree to receive our newsletter and marketing emails. You can unsubscribe at any time.
+        WealthSuperNova is currently invite-only. Request access to our bi-weekly newsletter with bonus market alerts.
       </p>
     </form>
   );

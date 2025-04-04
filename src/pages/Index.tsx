@@ -42,7 +42,7 @@ const Index = () => {
                 Supercharge Your Financial Future
               </h1>
               <p className="text-xl md:text-2xl text-white/80 mb-8 max-w-2xl">
-                Join the exclusive WealthSuperNova newsletter for cutting-edge investment insights, wealth-building strategies, and financial opportunities most people will never discover.
+                Join the exclusive WealthSuperNova bi-weekly newsletter for cutting-edge investment insights, wealth-building strategies, and bonus market alerts most people will never discover.
               </p>
               <div className="hidden md:block">
                 <NewsletterSignup className="max-w-md" />
@@ -54,9 +54,9 @@ const Index = () => {
                 <h2 className="text-2xl font-bold mb-6 text-center text-supernova-gold">What You'll Get</h2>
                 <ul className="space-y-4">
                   {[
-                    "Weekly exclusive financial insights",
+                    "Bi-weekly exclusive financial insights",
                     "Premium stock market analysis",
-                    "Early access to investment opportunities",
+                    "Bonus market alerts",
                     "Wealth-building strategies",
                     "Expert financial advice you won't find elsewhere"
                   ].map((item, index) => (
@@ -135,7 +135,7 @@ const Index = () => {
               Ready to <span className="text-supernova-gold">Transform</span> Your Financial Future?
             </h2>
             <p className="text-xl text-white/80 mb-8 mx-auto max-w-2xl">
-              Join thousands of smart investors who receive our premium financial insights every week. It's free, and you can unsubscribe anytime.
+              Join our exclusive list of high-net-worth individuals and sophisticated investors who receive our premium financial insights bi-weekly.
             </p>
             <NewsletterSignup className="max-w-md mx-auto" />
           </div>
