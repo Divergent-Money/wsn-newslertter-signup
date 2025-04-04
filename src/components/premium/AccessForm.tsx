@@ -1,31 +1,75 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
+import emailjs from 'emailjs-com';
 
 const AccessForm = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailJSInitialized, setEmailJSInitialized] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Initialize EmailJS once when the component mounts
+  useEffect(() => {
+    // You need to replace these with your actual EmailJS user ID
+    const emailJSUserId = "YOUR_EMAILJS_USER_ID"; // Replace with your actual User ID
+    
+    if (emailJSUserId && emailJSUserId !== "YOUR_EMAILJS_USER_ID") {
+      emailjs.init(emailJSUserId);
+      setEmailJSInitialized(true);
+    }
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      if (!emailJSInitialized) {
+        throw new Error("EmailJS not initialized. Please set your EmailJS User ID.");
+      }
+      
+      // Prepare template parameters
+      const templateParams = {
+        name,
+        email,
+        submit_time: new Date().toISOString(),
+        page_location: window.location.href
+      };
+      
+      // Send the email - replace with your actual service ID and template ID
+      const response = await emailjs.send(
+        'YOUR_SERVICE_ID',  // Replace with your EmailJS service ID
+        'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
+        templateParams
+      );
+      
+      console.log('Email sent successfully:', response);
+      
       toast({
         title: "Request Received",
         description: "Thank you for your interest in WealthSuperNova. We'll be in touch soon about early access.",
         duration: 5000,
       });
+      
+      // Reset form
       setEmail("");
       setName("");
-    }, 1500);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      toast({
+        title: "Submission Error",
+        description: "There was a problem submitting your request. Please try again later.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -77,6 +121,11 @@ const AccessForm = () => {
                 <p className="text-center text-xs text-white/50 mt-4">
                   Our team will review your application and respond within 48 hours.
                 </p>
+                {!emailJSInitialized && (
+                  <p className="text-center text-xs text-red-400 mt-2">
+                    Note: Email service not configured. Set up EmailJS credentials in code.
+                  </p>
+                )}
               </div>
             </form>
           </Card>
