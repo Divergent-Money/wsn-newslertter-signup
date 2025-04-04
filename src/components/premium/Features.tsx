@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from "@/components/ui/card";
-import { FeatureCard } from '@/components/FeatureCard';
+import FeatureCard from '@/components/FeatureCard';
 
 const Features = () => {
   const features = [
