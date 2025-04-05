@@ -8,8 +8,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Define form schema with Zod
 const formSchema = z.object({
@@ -38,21 +44,48 @@ const NewsletterSignup: React.FC<{ className?: string }> = ({ className }) => {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      // Insert the form data into your Supabase table
+      const { error } = await supabase
+        .from('newsletter_subscribers')
+        .insert([
+          { 
+            name: data.name,
+            email: data.email,
+            access_code: data.accessCode,
+            investment_level: data.investmentLevel,
+            interests: data.interests,
+            referral_source: data.referralSource,
+            created_at: new Date().toISOString(),
+            source: 'homepage_newsletter_form',
+            page_location: window.location.href
+          }
+        ]);
+      
+      if (error) {
+        throw error;
+      }
+      
       toast({
         title: "Request Received",
         description: "Thank you for your interest in WealthSuperNova. We'll review your application and be in touch soon.",
         duration: 5000,
       });
       form.reset();
-    }, 1500);
-    
-    console.log("Form data:", data);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast({
+        title: "Submission Error",
+        description: "There was a problem submitting your request. Please try again later.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const investmentOptions = [
