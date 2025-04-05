@@ -1,54 +1,47 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
-import emailjs from 'emailjs-com';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client with your public project URL and anon key
+// You can find these in your Supabase dashboard under Settings > API
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const AccessForm = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [emailJSInitialized, setEmailJSInitialized] = useState(false);
-
-  // Initialize EmailJS once when the component mounts
-  useEffect(() => {
-    // You need to replace these with your actual EmailJS user ID
-    const emailJSUserId = "YOUR_EMAILJS_USER_ID"; // Replace with your actual User ID
-    
-    if (emailJSUserId && emailJSUserId !== "YOUR_EMAILJS_USER_ID") {
-      emailjs.init(emailJSUserId);
-      setEmailJSInitialized(true);
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      if (!emailJSInitialized) {
-        throw new Error("EmailJS not initialized. Please set your EmailJS User ID.");
+      // Insert the form data into your Supabase table
+      const { data, error } = await supabase
+        .from('newsletter_subscribers') // Replace with your actual table name
+        .insert([
+          { 
+            name,
+            email,
+            created_at: new Date().toISOString(),
+            source: 'premium_access_form',
+            page_location: window.location.href
+          }
+        ]);
+      
+      if (error) {
+        throw error;
       }
       
-      // Prepare template parameters
-      const templateParams = {
-        name,
-        email,
-        submit_time: new Date().toISOString(),
-        page_location: window.location.href
-      };
-      
-      // Send the email - replace with your actual service ID and template ID
-      const response = await emailjs.send(
-        'YOUR_SERVICE_ID',  // Replace with your EmailJS service ID
-        'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
-        templateParams
-      );
-      
-      console.log('Email sent successfully:', response);
+      console.log('Form submission saved to Supabase:', data);
       
       toast({
         title: "Request Received",
@@ -60,7 +53,7 @@ const AccessForm = () => {
       setEmail("");
       setName("");
     } catch (error) {
-      console.error('Error sending email:', error);
+      console.error('Error submitting form:', error);
       toast({
         title: "Submission Error",
         description: "There was a problem submitting your request. Please try again later.",
@@ -121,11 +114,6 @@ const AccessForm = () => {
                 <p className="text-center text-xs text-white/50 mt-4">
                   Our team will review your application and respond within 48 hours.
                 </p>
-                {!emailJSInitialized && (
-                  <p className="text-center text-xs text-red-400 mt-2">
-                    Note: Email service not configured. Set up EmailJS credentials in code.
-                  </p>
-                )}
               </div>
             </form>
           </Card>
