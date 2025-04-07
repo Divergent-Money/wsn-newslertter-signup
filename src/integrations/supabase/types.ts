@@ -9,7 +9,214 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      article_engagement: {
+        Row: {
+          article_id: string
+          bookmarked: boolean | null
+          created_at: string
+          feedback: string | null
+          id: string
+          read_at: string | null
+          read_percentage: number | null
+          shared: boolean | null
+          time_spent_seconds: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          article_id: string
+          bookmarked?: boolean | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          read_at?: string | null
+          read_percentage?: number | null
+          shared?: boolean | null
+          time_spent_seconds?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          article_id?: string
+          bookmarked?: boolean | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          read_at?: string | null
+          read_percentage?: number | null
+          shared?: boolean | null
+          time_spent_seconds?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_engagement_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_articles: {
+        Row: {
+          author: string
+          category: string | null
+          content: string
+          created_at: string
+          feature_image_url: string | null
+          id: string
+          is_featured: boolean | null
+          min_tier: Database["public"]["Enums"]["subscription_tier"]
+          publish_date: string
+          read_time_minutes: number
+          slug: string
+          summary: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author: string
+          category?: string | null
+          content: string
+          created_at?: string
+          feature_image_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          min_tier?: Database["public"]["Enums"]["subscription_tier"]
+          publish_date?: string
+          read_time_minutes?: number
+          slug: string
+          summary: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string
+          category?: string | null
+          content?: string
+          created_at?: string
+          feature_image_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          min_tier?: Database["public"]["Enums"]["subscription_tier"]
+          publish_date?: string
+          read_time_minutes?: number
+          slug?: string
+          summary?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_market_alerts: boolean | null
+          email_new_content: boolean | null
+          email_weekly_digest: boolean | null
+          id: string
+          push_notifications: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_market_alerts?: boolean | null
+          email_new_content?: boolean | null
+          email_weekly_digest?: boolean | null
+          id?: string
+          push_notifications?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_market_alerts?: boolean | null
+          email_new_content?: boolean | null
+          email_weekly_digest?: boolean | null
+          id?: string
+          push_notifications?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_bookmarks: {
+        Row: {
+          article_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_bookmarks_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          id: string
+          payment_provider: string | null
+          payment_reference: string | null
+          payment_status: string | null
+          subscription_end_date: string | null
+          subscription_start_date: string
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          tier_update_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payment_provider?: string | null
+          payment_reference?: string | null
+          payment_status?: string | null
+          subscription_end_date?: string | null
+          subscription_start_date?: string
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          tier_update_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payment_provider?: string | null
+          payment_reference?: string | null
+          payment_status?: string | null
+          subscription_end_date?: string | null
+          subscription_start_date?: string
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          tier_update_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +225,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      subscription_tier: "free" | "blaze" | "premium"
     }
     CompositeTypes: {
       [_ in never]: never
