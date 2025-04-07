@@ -3,6 +3,7 @@ import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import ImageUploader from './ImageUploader';
 
 interface PublishingSectionProps {
   readTimeMinutes: number;
@@ -54,15 +55,10 @@ const PublishingSection: React.FC<PublishingSectionProps> = ({
         </div>
       </div>
       
-      <div className="space-y-2">
-        <Label htmlFor="featureImage">Feature Image URL</Label>
-        <Input 
-          id="featureImage" 
-          value={featureImageUrl} 
-          onChange={(e) => setFeatureImageUrl(e.target.value)} 
-          className="border-supernova-navy/30" 
-        />
-      </div>
+      <ImageUploader
+        featureImageUrl={featureImageUrl}
+        setFeatureImageUrl={setFeatureImageUrl}
+      />
       
       <div className="flex items-center space-x-2">
         <Switch 

@@ -1,1 +1,5 @@
+
 project_id = "jotwffwmmfubaawfnwrp"
+
+[functions.send-newsletter]
+verify_jwt = true

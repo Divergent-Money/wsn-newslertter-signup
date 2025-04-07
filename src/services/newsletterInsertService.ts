@@ -24,13 +24,25 @@ export const insertNewsletterArticle = async (article: Omit<NewsletterArticle, "
  * Uploads an image to Supabase storage and returns the public URL
  */
 export const uploadArticleImage = async (file: File, folderName: string = "newsletter_images") => {
+  // Validate file type and size
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error('Invalid file type. Please upload a JPG, PNG, GIF, or WebP image.');
+  }
+  
+  // Max size: 5MB
+  const maxSize = 5 * 1024 * 1024;
+  if (file.size > maxSize) {
+    throw new Error('File is too large. Maximum size is 5MB.');
+  }
+  
   // Create a unique file name
   const fileExt = file.name.split('.').pop();
   const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
   const filePath = `${folderName}/${fileName}`;
   
   // Upload the file
-  const { error: uploadError, data } = await supabase.storage
+  const { error: uploadError } = await supabase.storage
     .from('public')
     .upload(filePath, file, {
       cacheControl: '3600',
