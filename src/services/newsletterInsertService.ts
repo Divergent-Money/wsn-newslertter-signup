@@ -6,6 +6,9 @@ import { NewsletterArticle } from "./newsletterArchiveService";
  * Inserts a new newsletter article into the database
  */
 export const insertNewsletterArticle = async (article: Omit<NewsletterArticle, "id" | "created_at" | "updated_at">) => {
+  console.log("Inserting newsletter article:", article);
+  
+  // Make sure we're using the right Supabase client
   const { data, error } = await supabase
     .from('newsletter_articles')
     .insert(article)
