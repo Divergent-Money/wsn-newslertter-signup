@@ -177,45 +177,45 @@ const InsertNewsletter = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-supernova-navy to-black text-white py-12 px-8">
+    <div className="min-h-screen bg-supernova-gray py-12 px-8 text-supernova-black">
       <div className="container mx-auto max-w-4xl">
-        <Card className="bg-black/30 backdrop-blur-sm border-white/10">
-          <CardHeader>
-            <CardTitle className="text-2xl font-display">Insert New Newsletter</CardTitle>
-            <CardDescription>Add a new newsletter article to the database</CardDescription>
+        <Card className="border-supernova-navy/20 shadow-md">
+          <CardHeader className="bg-supernova-navy/10">
+            <CardTitle className="text-2xl font-display text-supernova-navy">Insert New Newsletter</CardTitle>
+            <CardDescription className="text-supernova-navy/80">Add a new newsletter article to the database</CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 pt-6">
               <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>
-                <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="bg-black/20 border-white/20" required />
+                <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="border-supernova-navy/30" required />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="slug">Slug (URL-friendly name)</Label>
-                <Input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)} className="bg-black/20 border-white/20" required />
+                <Input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)} className="border-supernova-navy/30" required />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="summary">Summary</Label>
-                <Textarea id="summary" value={summary} onChange={(e) => setSummary(e.target.value)} className="bg-black/20 border-white/20" required />
+                <Textarea id="summary" value={summary} onChange={(e) => setSummary(e.target.value)} className="border-supernova-navy/30" required />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="content">Content (HTML)</Label>
-                <Textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} className="bg-black/20 border-white/20 min-h-[200px]" required />
+                <Textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} className="border-supernova-navy/30 min-h-[200px]" required />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="author">Author</Label>
-                <Input id="author" value={author} onChange={(e) => setAuthor(e.target.value)} className="bg-black/20 border-white/20" required />
+                <Input id="author" value={author} onChange={(e) => setAuthor(e.target.value)} className="border-supernova-navy/30" required />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="minTier">Minimum Tier</Label>
                   <Select value={minTier} onValueChange={(value: SubscriptionTier) => setMinTier(value)}>
-                    <SelectTrigger className="bg-black/20 border-white/20">
+                    <SelectTrigger className="border-supernova-navy/30">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -231,30 +231,30 @@ const InsertNewsletter = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
-                  <Input id="category" value={category} onChange={(e) => setCategory(e.target.value)} className="bg-black/20 border-white/20" />
+                  <Input id="category" value={category} onChange={(e) => setCategory(e.target.value)} className="border-supernova-navy/30" />
                 </div>
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="tags">Tags (comma-separated)</Label>
-                <Input id="tags" value={tags} onChange={(e) => setTags(e.target.value)} className="bg-black/20 border-white/20" />
+                <Input id="tags" value={tags} onChange={(e) => setTags(e.target.value)} className="border-supernova-navy/30" />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="readTime">Read Time (minutes)</Label>
-                  <Input id="readTime" type="number" min="1" value={readTimeMinutes} onChange={(e) => setReadTimeMinutes(parseInt(e.target.value))} className="bg-black/20 border-white/20" required />
+                  <Input id="readTime" type="number" min="1" value={readTimeMinutes} onChange={(e) => setReadTimeMinutes(parseInt(e.target.value))} className="border-supernova-navy/30" required />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="publishDate">Publish Date</Label>
-                  <Input id="publishDate" type="date" value={publishDate} onChange={(e) => setPublishDate(e.target.value)} className="bg-black/20 border-white/20" required />
+                  <Input id="publishDate" type="date" value={publishDate} onChange={(e) => setPublishDate(e.target.value)} className="border-supernova-navy/30" required />
                 </div>
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="featureImage">Feature Image URL</Label>
-                <Input id="featureImage" value={featureImageUrl} onChange={(e) => setFeatureImageUrl(e.target.value)} className="bg-black/20 border-white/20" />
+                <Input id="featureImage" value={featureImageUrl} onChange={(e) => setFeatureImageUrl(e.target.value)} className="border-supernova-navy/30" />
               </div>
               
               <div className="flex items-center space-x-2">
@@ -263,7 +263,7 @@ const InsertNewsletter = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" disabled={isLoading} className="w-full">
+              <Button type="submit" disabled={isLoading} className="w-full bg-supernova-navy hover:bg-supernova-navy/90">
                 {isLoading ? "Inserting..." : "Insert Newsletter"}
               </Button>
             </CardFooter>
