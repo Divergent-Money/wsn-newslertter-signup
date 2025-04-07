@@ -1,17 +1,9 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { insertNewsletterArticle } from '@/services/newsletterInsertService';
 import { useToast } from "@/components/ui/use-toast";
+import { insertNewsletterArticle } from '@/services/newsletterInsertService';
 import { SubscriptionTier } from '@/services/newsletterArchiveService';
-import SubscriptionBadge from '@/components/newsletters/SubscriptionBadge';
+import InsertNewsletterForm from '@/components/newsletters/InsertNewsletterForm';
 
 const InsertNewsletter = () => {
   const navigate = useNavigate();
@@ -176,99 +168,25 @@ const InsertNewsletter = () => {
     }
   };
   
+  const formValues = {
+    title, slug, summary, content, author, minTier, category,
+    tags, readTimeMinutes, isFeatured, featureImageUrl, publishDate
+  };
+
+  const handleChange = {
+    setTitle, setSlug, setSummary, setContent, setAuthor, setMinTier,
+    setCategory, setTags, setReadTimeMinutes, setIsFeatured, setFeatureImageUrl, setPublishDate
+  };
+  
   return (
     <div className="min-h-screen bg-supernova-gray py-12 px-8 text-supernova-black">
       <div className="container mx-auto max-w-4xl">
-        <Card className="border-supernova-navy/20 shadow-md">
-          <CardHeader className="bg-supernova-navy/10">
-            <CardTitle className="text-2xl font-display text-supernova-navy">Insert New Newsletter</CardTitle>
-            <CardDescription className="text-supernova-navy/80">Add a new newsletter article to the database</CardDescription>
-          </CardHeader>
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-6 pt-6">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="border-supernova-navy/30" required />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="slug">Slug (URL-friendly name)</Label>
-                <Input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)} className="border-supernova-navy/30" required />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="summary">Summary</Label>
-                <Textarea id="summary" value={summary} onChange={(e) => setSummary(e.target.value)} className="border-supernova-navy/30" required />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="content">Content (HTML)</Label>
-                <Textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} className="border-supernova-navy/30 min-h-[200px]" required />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="author">Author</Label>
-                <Input id="author" value={author} onChange={(e) => setAuthor(e.target.value)} className="border-supernova-navy/30" required />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="minTier">Minimum Tier</Label>
-                  <Select value={minTier} onValueChange={(value: SubscriptionTier) => setMinTier(value)}>
-                    <SelectTrigger className="border-supernova-navy/30">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="free">Free</SelectItem>
-                      <SelectItem value="blaze">Blaze</SelectItem>
-                      <SelectItem value="premium">Premium</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <div className="pt-2">
-                    <SubscriptionBadge tier={minTier} />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Input id="category" value={category} onChange={(e) => setCategory(e.target.value)} className="border-supernova-navy/30" />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="tags">Tags (comma-separated)</Label>
-                <Input id="tags" value={tags} onChange={(e) => setTags(e.target.value)} className="border-supernova-navy/30" />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="readTime">Read Time (minutes)</Label>
-                  <Input id="readTime" type="number" min="1" value={readTimeMinutes} onChange={(e) => setReadTimeMinutes(parseInt(e.target.value))} className="border-supernova-navy/30" required />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="publishDate">Publish Date</Label>
-                  <Input id="publishDate" type="date" value={publishDate} onChange={(e) => setPublishDate(e.target.value)} className="border-supernova-navy/30" required />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="featureImage">Feature Image URL</Label>
-                <Input id="featureImage" value={featureImageUrl} onChange={(e) => setFeatureImageUrl(e.target.value)} className="border-supernova-navy/30" />
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Switch id="isFeatured" checked={isFeatured} onCheckedChange={setIsFeatured} />
-                <Label htmlFor="isFeatured">Feature this article</Label>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button type="submit" disabled={isLoading} className="w-full bg-supernova-navy hover:bg-supernova-navy/90">
-                {isLoading ? "Inserting..." : "Insert Newsletter"}
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
+        <InsertNewsletterForm
+          formValues={formValues}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );
