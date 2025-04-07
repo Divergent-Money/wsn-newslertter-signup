@@ -9,6 +9,7 @@ export function useNewsletterForm() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [insertedArticleId, setInsertedArticleId] = useState<string | null>(null);
   
   // Form state
   const [title, setTitle] = useState("WEALTHSUPERNOVA - Yield Curve Shifts and Q2 Strategic Positioning");
@@ -155,7 +156,8 @@ export function useNewsletterForm() {
         duration: 5000,
       });
       
-      navigate(`/newsletters/${insertedArticle.slug}`);
+      setInsertedArticleId(insertedArticle.id);
+      // Don't navigate automatically - stay on the page to allow sending emails
     } catch (error: any) {
       console.error("Error inserting newsletter:", error);
       toast({
@@ -179,6 +181,7 @@ export function useNewsletterForm() {
       setCategory, setTags, setReadTimeMinutes, setIsFeatured, setFeatureImageUrl, setPublishDate
     },
     handleSubmit,
-    isLoading
+    isLoading,
+    insertedArticleId
   };
 }

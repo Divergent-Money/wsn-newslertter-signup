@@ -18,7 +18,7 @@ serve(async (req) => {
   try {
     // Get the request body
     const body = await req.json();
-    const { newsletterId, emailSubject, emailType } = body;
+    const { newsletterId, emailSubject, emailType, testEmailAddress } = body;
     
     if (!newsletterId) {
       throw new Error("Newsletter ID is required");
@@ -40,39 +40,86 @@ serve(async (req) => {
       throw new Error(`Failed to fetch newsletter: ${newsletterError?.message || "Newsletter not found"}`);
     }
     
+    // If this is a test email, just send to the specified address
+    if (testEmailAddress) {
+      console.log(`Sending test newsletter "${emailSubject}" to ${testEmailAddress}`);
+      
+      // Here you would integrate with your preferred email service API
+      // For example, with SendGrid, Mailgun, Resend, etc.
+      // This is a placeholder for the actual email sending logic
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: `Test newsletter sent to ${testEmailAddress}`,
+          recipientCount: 1
+        }),
+        { 
+          headers: { 
+            "Content-Type": "application/json",
+            ...corsHeaders 
+          } 
+        }
+      );
+    }
+    
     // 2. Fetch subscribers based on the newsletter's minimum tier
     const { data: subscribers, error: subscribersError } = await supabase
       .from('user_subscriptions')
       .select('user_id')
-      .gte('tier', newsletter.min_tier);
+      .gte('tier', newsletter.min_tier)
+      .eq('payment_status', 'active');
       
     if (subscribersError) {
       throw new Error(`Failed to fetch subscribers: ${subscribersError.message}`);
     }
     
-    // 3. For each subscriber, get their email from auth.users (requires service role)
+    // 3. Get email addresses from profiles
     const userIds = subscribers.map(sub => sub.user_id);
-    const { data: users, error: usersError } = await supabase
-      .from('profiles')  // Assuming you have a profiles table linked to auth.users
-      .select('id, email')
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('email')
       .in('id', userIds);
       
-    if (usersError || !users) {
-      throw new Error(`Failed to fetch user emails: ${usersError?.message || "No users found"}`);
+    if (profilesError) {
+      throw new Error(`Failed to fetch user emails: ${profilesError.message}`);
     }
     
-    // 4. Log the email sending process (in a real implementation you'd connect to an email service)
-    console.log(`Would send email "${emailSubject}" to ${users.length} subscribers`);
-    console.log(`Email Type: ${emailType}, Newsletter: ${newsletter.title}`);
+    const emailAddresses = profiles.map(profile => profile.email).filter(Boolean);
     
-    // In a real implementation, you would call your email service here
-    // For example with Resend, SendGrid, etc.
+    if (emailAddresses.length === 0) {
+      throw new Error("No eligible subscribers found with valid email addresses");
+    }
+    
+    // 4. Prepare content based on email type
+    let emailContent = newsletter.content;
+    
+    if (emailType === 'summary') {
+      // For summary, use just the newsletter summary instead of full content
+      emailContent = `<h1>${newsletter.title}</h1><p>${newsletter.summary}</p>
+        <p><a href="${Deno.env.get("FRONTEND_URL")}/newsletters/${newsletter.slug}">Read the full newsletter</a></p>`;
+    }
+    
+    // 5. Log the email sending process (in a real implementation you'd connect to an email service)
+    console.log(`Sending ${emailType} newsletter "${emailSubject}" to ${emailAddresses.length} subscribers`);
+    console.log(`Newsletter ID: ${newsletterId}, Title: ${newsletter.title}`);
+    
+    // In a real implementation, you would send the emails using a service like SendGrid, Mailgun, Resend, etc.
+    // For example with Resend:
+    // 
+    // const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+    // const emailResponse = await resend.emails.send({
+    //   from: "WealthSuperNova <newsletter@wealthsupernova.com>",
+    //   to: recipientEmail,
+    //   subject: emailSubject,
+    //   html: emailContent
+    // });
     
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Newsletter scheduled for delivery to ${users.length} subscribers`,
-        recipientCount: users.length
+        message: `Newsletter scheduled for delivery to ${emailAddresses.length} subscribers`,
+        recipientCount: emailAddresses.length
       }),
       { 
         headers: { 

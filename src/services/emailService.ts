@@ -8,16 +8,18 @@ export const sendNewsletterToSubscribers = async (
   newsletterId: string, 
   options?: { 
     emailSubject?: string,
-    emailType?: 'full' | 'summary'  
+    emailType?: 'full' | 'summary' | 'preview',
+    testEmailAddress?: string
   }
 ) => {
-  const { emailSubject, emailType = 'full' } = options || {};
+  const { emailSubject, emailType = 'full', testEmailAddress } = options || {};
   
   const { data, error } = await supabase.functions.invoke('send-newsletter', {
     body: {
       newsletterId,
       emailSubject,
       emailType,
+      testEmailAddress,
     }
   });
   
