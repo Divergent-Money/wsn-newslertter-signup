@@ -1,12 +1,16 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 // Set up CORS headers for browser requests
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Initialize Resend client
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 // Handle requests
 serve(async (req) => {
@@ -44,15 +48,58 @@ serve(async (req) => {
     if (testEmailAddress) {
       console.log(`Sending test newsletter "${emailSubject}" to ${testEmailAddress}`);
       
-      // Here you would integrate with your preferred email service API
-      // For example, with SendGrid, Mailgun, Resend, etc.
-      // This is a placeholder for the actual email sending logic
+      // Prepare email content based on email type
+      let emailContent = newsletter.content;
+      
+      if (emailType === 'summary') {
+        // For summary, use just the newsletter summary instead of full content
+        emailContent = `<h1>${newsletter.title}</h1><p>${newsletter.summary}</p>
+          <p><a href="${Deno.env.get("FRONTEND_URL")}/newsletters/${newsletter.slug}">Read the full newsletter</a></p>`;
+      }
+      
+      // Convert basic HTML to email-friendly HTML
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${newsletter.title}</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+            h1 { color: #1a2e44; }
+            img { max-width: 100%; height: auto; }
+            .footer { margin-top: 30px; font-size: 12px; color: #666; border-top: 1px solid #eee; padding-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <h1>${newsletter.title}</h1>
+          ${emailContent}
+          <div class="footer">
+            <p>WealthSuperNova Newsletter<br>
+            © ${new Date().getFullYear()} WealthSuperNova. All rights reserved.</p>
+            <p><a href="${Deno.env.get("FRONTEND_URL")}/account/preferences">Manage your subscription preferences</a></p>
+          </div>
+        </body>
+        </html>
+      `;
+      
+      // Send the email using Resend
+      const emailResponse = await resend.emails.send({
+        from: "WealthSuperNova <newsletter@wealth-supernova.com>",
+        to: testEmailAddress,
+        subject: emailSubject || `${newsletter.title} - WealthSuperNova Newsletter`,
+        html: htmlContent,
+      });
+      
+      console.log("Test email sent:", emailResponse);
       
       return new Response(
         JSON.stringify({ 
           success: true, 
           message: `Test newsletter sent to ${testEmailAddress}`,
-          recipientCount: 1
+          recipientCount: 1,
+          emailId: emailResponse.id
         }),
         { 
           headers: { 
@@ -78,7 +125,7 @@ serve(async (req) => {
     const userIds = subscribers.map(sub => sub.user_id);
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('email')
+      .select('email, id')
       .in('id', userIds);
       
     if (profilesError) {
@@ -100,26 +147,72 @@ serve(async (req) => {
         <p><a href="${Deno.env.get("FRONTEND_URL")}/newsletters/${newsletter.slug}">Read the full newsletter</a></p>`;
     }
     
-    // 5. Log the email sending process (in a real implementation you'd connect to an email service)
-    console.log(`Sending ${emailType} newsletter "${emailSubject}" to ${emailAddresses.length} subscribers`);
-    console.log(`Newsletter ID: ${newsletterId}, Title: ${newsletter.title}`);
+    // Create a base HTML template for the email
+    const createEmailHtml = (recipientId: string) => `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${newsletter.title}</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+          h1 { color: #1a2e44; }
+          img { max-width: 100%; height: auto; }
+          .footer { margin-top: 30px; font-size: 12px; color: #666; border-top: 1px solid #eee; padding-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <h1>${newsletter.title}</h1>
+        ${emailContent}
+        <div class="footer">
+          <p>WealthSuperNova Newsletter<br>
+          © ${new Date().getFullYear()} WealthSuperNova. All rights reserved.</p>
+          <p><a href="${Deno.env.get("FRONTEND_URL")}/account/preferences?uid=${recipientId}">Manage your subscription preferences</a></p>
+        </div>
+      </body>
+      </html>
+    `;
     
-    // In a real implementation, you would send the emails using a service like SendGrid, Mailgun, Resend, etc.
-    // For example with Resend:
-    // 
-    // const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-    // const emailResponse = await resend.emails.send({
-    //   from: "WealthSuperNova <newsletter@wealthsupernova.com>",
-    //   to: recipientEmail,
-    //   subject: emailSubject,
-    //   html: emailContent
-    // });
+    // 5. Send emails using Resend (for production, you'd batch these or use a queue)
+    console.log(`Sending ${emailType} newsletter "${emailSubject}" to ${emailAddresses.length} subscribers`);
+    
+    // For demo purposes, we'll just send to the first 5 recipients to avoid rate limits
+    const batchSize = 5;
+    const recipientBatch = emailAddresses.slice(0, Math.min(batchSize, emailAddresses.length));
+    
+    // Track successful sends
+    let successCount = 0;
+    
+    // For each recipient in the batch, send a personalized email
+    for (let i = 0; i < recipientBatch.length; i++) {
+      const recipient = recipientBatch[i];
+      const recipientProfile = profiles.find(p => p.email === recipient);
+      
+      if (!recipientProfile) continue;
+      
+      try {
+        const emailResult = await resend.emails.send({
+          from: "WealthSuperNova <newsletter@wealth-supernova.com>",
+          to: recipient,
+          subject: emailSubject || `${newsletter.title} - WealthSuperNova Newsletter`,
+          html: createEmailHtml(recipientProfile.id),
+        });
+        
+        console.log(`Email sent to ${recipient}: ${emailResult.id}`);
+        successCount++;
+      } catch (emailError) {
+        console.error(`Failed to send email to ${recipient}:`, emailError);
+      }
+    }
     
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Newsletter scheduled for delivery to ${emailAddresses.length} subscribers`,
-        recipientCount: emailAddresses.length
+        message: `Newsletter sent to ${successCount} recipients (${emailAddresses.length} total subscribers).`,
+        recipientCount: emailAddresses.length,
+        sentCount: successCount,
+        note: "For demo purposes, only sending to a small subset of subscribers."
       }),
       { 
         headers: { 
