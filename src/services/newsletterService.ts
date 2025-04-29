@@ -10,21 +10,28 @@ import { NewsletterFormValues } from "@/schemas/newsletterSchema";
  */
 export const submitNewsletterSignup = async (data: NewsletterFormValues) => {
   try {
+    console.log("Newsletter signup data:", data);
+    
+    // Prepare the data object with all required fields
+    const subscriberData = {
+      name: data.name,
+      email: data.email,
+      access_code: data.accessCode || '',
+      investment_level: data.investmentLevel || '$100K-$500K',
+      interests: Array.isArray(data.interests) ? data.interests : [],
+      referral_source: data.referralSource || '',
+      created_at: new Date().toISOString(),
+      source: 'homepage_newsletter_form',
+      page_location: typeof window !== 'undefined' ? window.location.href : null
+    };
+    
+    console.log("Prepared subscriber data:", subscriberData);
+    
     // Insert new subscriber or update existing one
     const { data: insertedData, error: insertError } = await supabase
       .from('newsletter_subscribers')
       .upsert(
-        { 
-          name: data.name,
-          email: data.email,
-          access_code: data.accessCode || '',
-          investment_level: data.investmentLevel || '$100K-$500K',
-          interests: data.interests || [],
-          referral_source: data.referralSource || '',
-          created_at: new Date().toISOString(),
-          source: 'homepage_newsletter_form',
-          page_location: typeof window !== 'undefined' ? window.location.href : null
-        },
+        subscriberData,
         { 
           onConflict: 'email',
           ignoreDuplicates: false
@@ -34,8 +41,13 @@ export const submitNewsletterSignup = async (data: NewsletterFormValues) => {
       .single();
       
     if (insertError) {
-      console.error('Error in newsletter signup:', insertError);
-      throw insertError;
+      console.error('Error in newsletter signup (detailed):', {
+        code: insertError.code,
+        message: insertError.message,
+        details: insertError.details,
+        hint: insertError.hint
+      });
+      throw new Error(`Signup error: ${insertError.message}`);
     }
     
     const subscriberId = insertedData?.id;
@@ -43,8 +55,11 @@ export const submitNewsletterSignup = async (data: NewsletterFormValues) => {
       throw new Error('Failed to retrieve subscriber ID');
     }
     
-    // Try to send a welcome email using the edge function
+    console.log("Successfully inserted subscriber with ID:", subscriberId);
+    
+    // Try to send a welcome email using the edge function (if it exists)
     try {
+      console.log("Attempting to send welcome email for subscriber:", subscriberId);
       const { error: welcomeEmailError } = await supabase.functions.invoke('send-newsletter', {
         body: {
           subscriberId,
@@ -56,6 +71,8 @@ export const submitNewsletterSignup = async (data: NewsletterFormValues) => {
       if (welcomeEmailError) {
         console.error('Welcome email could not be sent:', welcomeEmailError);
         // We don't throw here as the signup was successful
+      } else {
+        console.log("Welcome email sent successfully");
       }
     } catch (emailError) {
       console.error('Error invoking welcome email function:', emailError);

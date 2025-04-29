@@ -24,6 +24,7 @@ const NewsletterSignup: React.FC<{ className?: string }> = ({ className }) => {
       email: "",
       accessCode: "",
       interests: [],
+      investmentLevel: "$100K-$500K",  // Set a default value
       referralSource: "",
     },
   });
@@ -34,7 +35,17 @@ const NewsletterSignup: React.FC<{ className?: string }> = ({ className }) => {
     
     try {
       console.log("Submitting newsletter form with:", data);
-      const result = await submitNewsletterSignup(data);
+      
+      // Make sure all required fields have values even if not filled by user
+      const completeData = {
+        ...data,
+        accessCode: data.accessCode || "",
+        investmentLevel: data.investmentLevel || "$100K-$500K",
+        interests: data.interests || [],
+        referralSource: data.referralSource || ""
+      };
+      
+      const result = await submitNewsletterSignup(completeData);
       console.log("Submission result:", result);
       
       toast({
@@ -42,6 +53,7 @@ const NewsletterSignup: React.FC<{ className?: string }> = ({ className }) => {
         description: "Thank you for your interest in WealthSuperNova. We'll review your application and be in touch soon.",
         duration: 5000,
       });
+      
       form.reset();
     } catch (error: any) {
       console.error('Error submitting form:', error);
