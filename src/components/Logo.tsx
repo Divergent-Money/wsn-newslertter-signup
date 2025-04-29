@@ -5,12 +5,20 @@ import { cn } from "@/lib/utils";
 interface LogoProps {
   className?: string;
   withStars?: boolean;
+  size?: "sm" | "md" | "lg"; // Add size prop with specific options
 }
 
-const Logo: React.FC<LogoProps> = ({ className, withStars = true }) => {
+const Logo: React.FC<LogoProps> = ({ className, withStars = true, size = "md" }) => {
+  // Determine text size based on the size prop
+  const textSizeClasses = {
+    sm: "text-2xl md:text-3xl",
+    md: "text-3xl md:text-4xl",
+    lg: "text-4xl md:text-5xl"
+  };
+
   return (
     <div className={cn("relative inline-block", className)}>
-      <h1 className="text-3xl md:text-4xl font-bold font-display">
+      <h1 className={cn("font-bold font-display", textSizeClasses[size])}>
         WealthSuperNova
       </h1>
       
