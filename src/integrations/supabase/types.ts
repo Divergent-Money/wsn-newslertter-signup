@@ -113,6 +113,51 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_subscribers: {
+        Row: {
+          access_code: string | null
+          confirmation_sent_at: string | null
+          created_at: string
+          email: string
+          id: string
+          interests: string[] | null
+          investment_level: string | null
+          is_confirmed: boolean | null
+          name: string
+          page_location: string | null
+          referral_source: string | null
+          source: string | null
+        }
+        Insert: {
+          access_code?: string | null
+          confirmation_sent_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          interests?: string[] | null
+          investment_level?: string | null
+          is_confirmed?: boolean | null
+          name: string
+          page_location?: string | null
+          referral_source?: string | null
+          source?: string | null
+        }
+        Update: {
+          access_code?: string | null
+          confirmation_sent_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          interests?: string[] | null
+          investment_level?: string | null
+          is_confirmed?: boolean | null
+          name?: string
+          page_location?: string | null
+          referral_source?: string | null
+          source?: string | null
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           created_at: string

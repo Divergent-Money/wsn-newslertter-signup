@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
-import { supabase } from "@/lib/supabase";
+import { submitNewsletterSignup } from "@/services/newsletterService";
 
 const AccessForm = () => {
   const { toast } = useToast();
@@ -16,24 +17,14 @@ const AccessForm = () => {
     setLoading(true);
     
     try {
-      // Insert the form data into your Supabase table
-      const { data, error } = await supabase
-        .from('newsletter_subscribers') // Replace with your actual table name
-        .insert([
-          { 
-            name,
-            email,
-            created_at: new Date().toISOString(),
-            source: 'premium_access_form',
-            page_location: window.location.href
-          }
-        ]);
-      
-      if (error) {
-        throw error;
-      }
-      
-      console.log('Form submission saved to Supabase:', data);
+      await submitNewsletterSignup({
+        name,
+        email,
+        accessCode: "",
+        investmentLevel: "$100K-$500K", // Default value
+        interests: [],
+        referralSource: "premium_access_form"
+      });
       
       toast({
         title: "Request Received",
