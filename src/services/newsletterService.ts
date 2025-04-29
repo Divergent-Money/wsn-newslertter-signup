@@ -10,68 +10,44 @@ import { NewsletterFormValues } from "@/schemas/newsletterSchema";
  */
 export const submitNewsletterSignup = async (data: NewsletterFormValues) => {
   try {
-    // Check if the email already exists
-    const { data: existingUser, error: checkError } = await supabase
-      .from('newsletter_subscribers')
-      .select('id')
-      .eq('email', data.email)
-      .maybeSingle();
-    
-    if (checkError) {
-      console.error('Error checking for existing subscriber:', checkError);
-      throw checkError;
-    }
-    
-    // If the subscriber already exists, update their information
-    if (existingUser) {
-      const { error: updateError } = await supabase
-        .from('newsletter_subscribers')
-        .update({
-          name: data.name,
-          access_code: data.accessCode,
-          investment_level: data.investmentLevel,
-          interests: data.interests,
-          referral_source: data.referralSource,
-        })
-        .eq('id', existingUser.id);
-        
-      if (updateError) {
-        console.error('Error updating existing subscriber:', updateError);
-        throw updateError;
-      }
-      
-      return { isNewSubscriber: false, id: existingUser.id };
-    }
-    
-    // Insert new subscriber with public access
+    // Insert new subscriber or update existing one
     const { data: insertedData, error: insertError } = await supabase
       .from('newsletter_subscribers')
-      .insert([
+      .upsert(
         { 
           name: data.name,
           email: data.email,
-          access_code: data.accessCode,
-          investment_level: data.investmentLevel,
-          interests: data.interests,
-          referral_source: data.referralSource,
+          access_code: data.accessCode || '',
+          investment_level: data.investmentLevel || '$100K-$500K',
+          interests: data.interests || [],
+          referral_source: data.referralSource || '',
           created_at: new Date().toISOString(),
           source: 'homepage_newsletter_form',
           page_location: typeof window !== 'undefined' ? window.location.href : null
+        },
+        { 
+          onConflict: 'email',
+          ignoreDuplicates: false
         }
-      ])
+      )
       .select('id')
       .single();
       
     if (insertError) {
-      console.error('Error inserting new subscriber:', insertError);
+      console.error('Error in newsletter signup:', insertError);
       throw insertError;
+    }
+    
+    const subscriberId = insertedData?.id;
+    if (!subscriberId) {
+      throw new Error('Failed to retrieve subscriber ID');
     }
     
     // Try to send a welcome email using the edge function
     try {
       const { error: welcomeEmailError } = await supabase.functions.invoke('send-newsletter', {
         body: {
-          subscriberId: insertedData.id,
+          subscriberId,
           emailType: 'welcome',
           emailSubject: 'Welcome to WealthSuperNova Newsletter'
         }
@@ -86,7 +62,7 @@ export const submitNewsletterSignup = async (data: NewsletterFormValues) => {
       // We don't throw here as the signup was successful
     }
     
-    return { isNewSubscriber: true, id: insertedData.id };
+    return { isNewSubscriber: true, id: subscriberId };
   } catch (error) {
     console.error('Newsletter signup failed:', error);
     throw error;

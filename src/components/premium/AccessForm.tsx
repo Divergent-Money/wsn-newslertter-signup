@@ -18,8 +18,16 @@ const AccessForm = () => {
     setLoading(true);
     setFormError("");
     
+    if (!name || !email) {
+      setFormError("Please fill in all required fields");
+      setLoading(false);
+      return;
+    }
+    
     try {
-      await submitNewsletterSignup({
+      console.log("Submitting access form with:", { name, email });
+      
+      const result = await submitNewsletterSignup({
         name,
         email,
         accessCode: "",
@@ -27,6 +35,8 @@ const AccessForm = () => {
         interests: [],
         referralSource: "premium_access_form"
       });
+      
+      console.log("Submission result:", result);
       
       toast({
         title: "Request Received",
@@ -37,9 +47,9 @@ const AccessForm = () => {
       // Reset form
       setEmail("");
       setName("");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting form:', error);
-      setFormError("There was an issue processing your request. Please try again.");
+      setFormError(error?.message || "There was an issue processing your request. Please try again.");
       toast({
         title: "Submission Error",
         description: "There was a problem submitting your request. Please try again later.",

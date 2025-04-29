@@ -33,7 +33,9 @@ const NewsletterSignup: React.FC<{ className?: string }> = ({ className }) => {
     setFormError("");
     
     try {
-      await submitNewsletterSignup(data);
+      console.log("Submitting newsletter form with:", data);
+      const result = await submitNewsletterSignup(data);
+      console.log("Submission result:", result);
       
       toast({
         title: "Request Received",
@@ -41,9 +43,9 @@ const NewsletterSignup: React.FC<{ className?: string }> = ({ className }) => {
         duration: 5000,
       });
       form.reset();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting form:', error);
-      setFormError("There was an issue processing your request. Please try again.");
+      setFormError(error?.message || "There was an issue processing your request. Please try again.");
       toast({
         title: "Submission Error",
         description: "There was a problem submitting your request. Please try again later.",
@@ -75,6 +77,7 @@ const NewsletterSignup: React.FC<{ className?: string }> = ({ className }) => {
                     {...field}
                     placeholder="Your Full Name"
                     className="h-12 bg-white/10 backdrop-blur-sm border-supernova-gold/30 text-white placeholder:text-white/50"
+                    required
                   />
                 </FormControl>
               </FormItem>
@@ -92,6 +95,7 @@ const NewsletterSignup: React.FC<{ className?: string }> = ({ className }) => {
                     type="email"
                     placeholder="Your Email Address"
                     className="h-12 bg-white/10 backdrop-blur-sm border-supernova-gold/30 text-white placeholder:text-white/50"
+                    required
                   />
                 </FormControl>
               </FormItem>
