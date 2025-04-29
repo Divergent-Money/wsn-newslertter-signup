@@ -11,10 +11,12 @@ const AccessForm = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setFormError("");
     
     try {
       await submitNewsletterSignup({
@@ -37,6 +39,7 @@ const AccessForm = () => {
       setName("");
     } catch (error) {
       console.error('Error submitting form:', error);
+      setFormError("There was an issue processing your request. Please try again.");
       toast({
         title: "Submission Error",
         description: "There was a problem submitting your request. Please try again later.",
@@ -63,6 +66,11 @@ const AccessForm = () => {
           <Card className="bg-white/5 backdrop-blur-sm border-white/10 p-8">
             <form onSubmit={handleSubmit}>
               <div className="space-y-6">
+                {formError && (
+                  <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded">
+                    {formError}
+                  </div>
+                )}
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-white/80 mb-1">Full Name</label>
                   <Input

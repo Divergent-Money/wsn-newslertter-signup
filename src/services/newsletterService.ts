@@ -43,7 +43,7 @@ export const submitNewsletterSignup = async (data: NewsletterFormValues) => {
       return { isNewSubscriber: false, id: existingUser.id };
     }
     
-    // Insert new subscriber
+    // Insert new subscriber with public access
     const { data: insertedData, error: insertError } = await supabase
       .from('newsletter_subscribers')
       .insert([

@@ -14,6 +14,7 @@ import InterestsSection from './newsletter/InterestsSection';
 
 const NewsletterSignup: React.FC<{ className?: string }> = ({ className }) => {
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
   const { toast } = useToast();
 
   const form = useForm<NewsletterFormValues>({
@@ -29,6 +30,7 @@ const NewsletterSignup: React.FC<{ className?: string }> = ({ className }) => {
 
   const onSubmit = async (data: NewsletterFormValues) => {
     setLoading(true);
+    setFormError("");
     
     try {
       await submitNewsletterSignup(data);
@@ -41,6 +43,7 @@ const NewsletterSignup: React.FC<{ className?: string }> = ({ className }) => {
       form.reset();
     } catch (error) {
       console.error('Error submitting form:', error);
+      setFormError("There was an issue processing your request. Please try again.");
       toast({
         title: "Submission Error",
         description: "There was a problem submitting your request. Please try again later.",
@@ -56,6 +59,12 @@ const NewsletterSignup: React.FC<{ className?: string }> = ({ className }) => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className={className}>
         <div className="flex flex-col space-y-4">
+          {formError && (
+            <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded text-sm">
+              {formError}
+            </div>
+          )}
+          
           <FormField
             control={form.control}
             name="name"

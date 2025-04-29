@@ -12,7 +12,7 @@ const Header = () => {
       <div className="container mx-auto max-w-7xl">
         <div className="flex justify-between items-center">
           <div className="cursor-pointer" onClick={() => navigate('/')}>
-            <Logo size="sm" color="text-white" />
+            <Logo size="sm" color="text-supernova-gold" />
           </div>
           <Button 
             variant="outline" 
